@@ -26,6 +26,25 @@ function getTopRow(sheet: Sheet): Payload {
   return payload;
 }
 
+function sortSheet(sheet: Sheet) {
+  const lastCol = parseInt(sheet.getLastColumn());
+  const lastRow = parseInt(sheet.getLastRow());
+
+  const locked = getColumnIndexByHeaderId("Locked");
+  const status = getColumnIndexByHeaderId("StatusCode");
+  const updated = getColumnIndexByHeaderId("UnixTime");
+
+  Logger.log(JSON.stringify({ locked, status, updated }));
+
+  const range = sheet.getRange(2, 1, lastRow - 2, lastCol - 1);
+  range.activate();
+  range.sort([
+    { column: locked, ascending: true },
+    { column: status, ascending: true },
+    { column: updated, ascending: true },
+  ]);
+}
+
 function testGetActivtSheetByName() {
   const sheet = getActiveSheetByName("Test");
 
@@ -54,4 +73,8 @@ function testGetTopRow(sheet: Sheet) {
   if ('__DOES_NOT_EXITS__' in payload) {
     throw new Error('in this case, this key should not exist in payload');
   }
+}
+
+function testSortSheet(sheet: Sheet) {
+  sortSheet(sheet);
 }
