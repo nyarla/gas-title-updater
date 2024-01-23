@@ -17,3 +17,6 @@ const Headers: Record<HeaderId, HeaderKey> = {
 
 /* payload */
 type Payload = Record<HeaderId, string>;
+
+/* fetchurl */
+const Expiration = 60 * 60 * 24 * 7; // 1 week
