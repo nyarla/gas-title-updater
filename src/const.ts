@@ -7,7 +7,7 @@ type HeaderId = string;
 type HeaderKey = string;
 
 const Headers: Record<HeaderId, HeaderKey> = {
-  UnixTime: "UnixTime",
+  DateTime: "更新日",
   StatusCode: "HTTP",
   Locked: "ロック",
   Link: "記事内リンク",

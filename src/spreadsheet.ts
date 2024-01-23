@@ -40,7 +40,7 @@ function sortSheet(sheet: Sheet) {
 
   const locked = getColumnIndexByHeaderId("Locked");
   const status = getColumnIndexByHeaderId("StatusCode");
-  const updated = getColumnIndexByHeaderId("UnixTime");
+  const updated = getColumnIndexByHeaderId("DateTime");
 
   Logger.log(JSON.stringify({ locked, status, updated }));
 
@@ -85,7 +85,7 @@ function testGetTopRow(sheet: Sheet) {
 
 function testWriteToTopRow(sheet: Sheet) {
   const payload: Payload = {
-    UnixTime: (Math.floor(Date.now() / 1000)),
+    DateTime: (new Date(Date.now())).toISOString(),
     StatusCode: 200,
     Locked: false,
     Link: "https://example.com",
