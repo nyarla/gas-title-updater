@@ -26,6 +26,14 @@ function getTopRow(sheet: Sheet): Payload {
   return payload;
 }
 
+function writeToTopRow(sheet: Sheet, payload: Payload) {
+  const range = sheet.getRange(2, 1, 1, parseInt(sheet.getLastColumn()));
+
+  for (const key of Object.keys(payload)) {
+    range.getCell(1, getColumnIndexByHeaderId(key)).setValue(payload[key]);
+  }
+}
+
 function sortSheet(sheet: Sheet) {
   const lastCol = parseInt(sheet.getLastColumn());
   const lastRow = parseInt(sheet.getLastRow());
@@ -73,6 +81,19 @@ function testGetTopRow(sheet: Sheet) {
   if ('__DOES_NOT_EXITS__' in payload) {
     throw new Error('in this case, this key should not exist in payload');
   }
+}
+
+function testWriteToTopRow(sheet: Sheet) {
+  const payload: Payload = {
+    UnixTime: (Math.floor(Date.now() / 1000)),
+    StatusCode: 200,
+    Locked: false,
+    Link: "https://example.com",
+    Permalink: "https://example.com",
+    Title: "Example",
+  };
+
+  writeToTopRow(sheet, payload);
 }
 
 function testSortSheet(sheet: Sheet) {
