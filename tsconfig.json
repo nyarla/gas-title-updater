@@ -7,6 +7,6 @@
       "lib": ["esnext"],
       "module": "None",
       "noImplicitUseStrict": true,
-      "types": ["@types/google-apps-script", "@types/node"]
+      "types": ["@types/google-apps-script", "@types/node", "@types/cheerio"]
   }
 }
