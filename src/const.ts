@@ -14,3 +14,6 @@ const Headers: Record<HeaderId, HeaderKey> = {
   Permalink: "固有リンク",
   Title: "タイトル",
 };
+
+/* payload */
+type Payload = Record<HeaderId, string>;
