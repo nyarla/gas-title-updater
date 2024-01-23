@@ -1,4 +1,8 @@
 function shouldUpdate(lastUpdated, now: number): bool {
+  if (Number.isNaN(lastUpdated)) {
+    return true;
+  }
+
   return now >= lastUpdated + Expiration;
 }
 
