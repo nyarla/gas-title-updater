@@ -12,3 +12,6 @@ open:
 
 test: push
 	pnpm exec clasp run testing
+
+run: push
+	pnpm exec clasp run main

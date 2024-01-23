@@ -43,3 +43,66 @@ function testing(): bool {
 
   Logger.log('done');
 }
+
+function main() {
+  Logger.log("main");
+  const sheet = getActiveSheetByName("Production");
+
+  Logger.log('init');
+  if (! init(sheet)) {
+    Logger.log('failed to initialize test');
+    return false;
+  }
+
+  Logger.log("sort ...");
+  sortSheet(sheet);
+
+  const data: Payload = getTopRow(sheet);
+  if (data.Locked === "TURE") {
+    Logger.log("skip: locked url");
+    Logger.log("done");
+    return;
+  }
+
+  const date: number = Math.floor(Date.parse(data.DateTime) / 1000);
+  const now: number = Math.floor(Date.now() / 1000);
+
+  if (!shouldUpdate(date, now)) {
+    Logger.log("skip: this url should not update by lastmodified date");
+    Logger.log("done");
+    return;
+  }
+
+  Logger.log("update: %s", data.Link);
+  data.DateTime = (new Date(Date.now())).toISOString();
+  writeToTopRow(sheet, data);
+
+  const [status, location, content] = fetchUrl(data.Link, date);
+  if (status === 304) {
+    Logger.log("fetch: this url not modified.");
+    Logger.log("done");
+    return;
+  }
+
+  data.StatusCode = status;
+  if (location) {
+    data.Permalink = location;
+  }
+
+  if (status === 200) {
+    const title = parseTitle(content, data.Title);
+    if (title) {
+      data.Title = title;
+    }
+
+    Logger.log('fetchurl is succeed.');
+  }
+  else {
+    data.Locked  = "TRUE";
+    data.Message = content;
+    Logger.log('failed to fetchurl.');
+  }
+
+  writeToTopRow(sheet, data);
+  Logger.log("done");
+}
