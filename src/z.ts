@@ -33,7 +33,7 @@ function testing(): bool {
 
     if (func.match(/^test/)) {
       try {
-        this[func].call()
+        this[func].call(this, sheet);
         Logger.log(`${func} is ok`);
       } catch(err) {
         Logger.log("failed to test of %s: %s", func, err.toString())
