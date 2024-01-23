@@ -13,6 +13,7 @@ const Headers: Record<HeaderId, HeaderKey> = {
   Link: "記事内リンク",
   Permalink: "固有リンク",
   Title: "タイトル",
+  Message: "メッセージ",
 };
 
 /* payload */
