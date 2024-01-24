@@ -7,6 +7,10 @@ function shouldUpdate(lastUpdated, now: number): bool {
 }
 
 function isSameHref(a, b) {
+  if (a === undefined || a === null || b === null || b === undefined) {
+    return false;
+  }
+
   const aURL = a.replace(/^https?:/, '');
   const bURL = b.replace(/^https?:/, '');
 
@@ -30,7 +34,7 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
   try {
     for (let retry = 0; retry < 5; retry++) {
       const response = UrlFetchApp.fetch(location, params);
-      
+
       statusCode = response.getResponseCode();
      
       if (301 <= statusCode && statusCode <= 399) {
@@ -71,6 +75,22 @@ function testShouldUpdate() {
 function testIsSameHref() {
   if (!isSameHref('http://example.com', 'https://example.com')) {
     throw new Error("in this case, this result should be true");
+  }
+
+  if (isSameHref(undefined, 'https://example.com')) {
+    throw new Error("in this case, this result should be false");
+  }
+
+  if (isSameHref(null, 'https://example.com')) {
+    throw new Error("in this case, this result should be false");
+  }
+
+  if (isSameHref('https://example.com', undefined)) {
+    throw new Error("in this case, this result should be false");
+  }
+
+  if (isSameHref('https://example.com', null)) {
+    throw new Error("in this case, this result should be false");
   }
 
   if (isSameHref('http://example.com/foo', 'https://example.com/bar')) {
