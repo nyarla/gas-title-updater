@@ -39,6 +39,44 @@ function parseTitle(html, fallback: string): string {
   return fallback;
 }
 
+function stripTitle(title: string): string {
+  return title.replace(/\s+/g, ' ')
+}
+
+function detectEncoding(contentType, src: string): string {
+  let matched = contentType.match(/charset=([^ ]+)/);
+  if (matched) {
+    return matched[1];
+  }
+
+  matched = src.match(/charset="([^"]+)"/);
+  if (matched) {
+    return matched[1];
+  }
+
+  matched = src.match(/charset='([^']+)'/);
+  if (matched) {
+    return matched[1];
+  }
+
+  matched = src.match(/charset=([^ ]+)/);
+  if (matched) {
+    return matched[1];
+  }
+
+  matched = src.match(/encoding="([^"]+)"/)
+  if (matched) {
+    return matched[1];
+  }
+
+  matched = src.match(/encoding='([^']+)'/)
+  if (matched) {
+    return matched[1];
+  }
+
+  return 'utf-8';
+}
+
 function testParseTitle() {
   const cases = [
     ['<meta property="og:title" content="test" />', "test"],
@@ -55,6 +93,25 @@ function testParseTitle() {
     const title = parseTitle(test[0], 'fallback');
     if (title !== test[1]) {
       throw new Error(`failed to parse title: ${test[0]}: ${test[1]}`);
+    }
+  }
+}
+
+function testDetectEncoding() {
+  const cases = [
+    [ ['charset=UTF-8', ''], 'UTF-8' ],
+    [ ['', 'charset="UTF-8"'], 'UTF-8' ],
+    [ ['', "charset='UTF-8'"], 'UTF-8' ],
+    [ ['', 'charset=UTF-8'], 'UTF-8' ],
+    [ ['', 'encoding="UTF-8"'], 'UTF-8' ],
+    [ ['', "encoding='UTF-8'"], 'UTF-8' ],
+  ];
+
+  for (const test of cases) {
+    const [ payload, charset ] = test;
+    const [ contentType, src ] = payload;
+    if (detectEncoding(contentType, src) !== charset) {
+      throw new Error(`failed to detect encoding: ${contentType} ${src}`);
     }
   }
 }
