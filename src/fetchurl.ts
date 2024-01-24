@@ -46,7 +46,7 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
         break;
       }
 
-      charset = detectEncoding(response.getHeaders()['Content-Type'], response.getContentText());
+      const charset = detectEncoding(response.getHeaders()['Content-Type'], response.getContentText());
       content = response.getContentText(charset);
 
       break;
@@ -100,7 +100,28 @@ function testIsSameHref() {
 }
 
 function testFetchUrl() {
-  const [ status, href, content ] = fetchUrl('https://example.com', 0);
+  const cases = [
+    ['https://example.com', [ 200, 'https://example.com', /Example Domain/ ] ],
+    ['http://www.remus.dti.ne.jp/~takeucto/', [ 200, 'http://www.remus.dti.ne.jp/~takeucto/', /竹箒/ ] ],
+    ['http://the.kalaclista.com', [ 200, 'https://the.kalaclista.com/', /カラクリスタ/ ] ],
+  ];
 
-  Logger.log(JSON.stringify({ status, href, content }));
+  for (const test of cases) {
+    const [ href, result ] = test;
+    const [ status, location, content ] = fetchUrl(href, 0);
+
+    if ( status !== result[0] ) {
+      Logger.log("failed to fetchurl: %s: %s", href, status)
+    }
+
+    if ( location !== result[1]) {
+      Logger.log("failed to redirect url: %s: %s", location, result[1]);
+    }
+
+    const title = stripTitle(parseTitle(content || ''));
+
+    if ( ! title.match(result[2]) ) {
+      Logger.log("cannot find specified string: %s: %s", location, title);
+    }
+  }
 }
