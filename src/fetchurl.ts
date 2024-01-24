@@ -23,11 +23,11 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
     headers: {
       'If-Modified-Since': new Date(lastUpdated).toUTCString(),
     },
-    muteHTTPExceptions: true,
-    followRedirect: false,
+    muteHttpExceptions: true,
+    followRedirects: false,
   };
 
-  let statusCode = 0;
+  let statusCode = 599;
   let location = href;
   let content = "";
 
@@ -46,12 +46,13 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
         break;
       }
 
-      content = response.getContentText();
+      charset = detectEncoding(response.getHeaders()['Content-Type'], response.getContentText());
+      content = response.getContentText(charset);
+
       break;
     }
   }
   catch (err) {
-    statusCode = 599;
     content = err.toString();
   }
 
