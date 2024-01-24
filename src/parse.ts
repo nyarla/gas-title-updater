@@ -44,32 +44,32 @@ function stripTitle(title: string): string {
 }
 
 function detectEncoding(contentType, src: string): string {
-  let matched = contentType.match(/charset=([^ ]+)/);
+  let matched = contentType.match(/charset=([^ "']+)/);
   if (matched) {
     return matched[1];
   }
 
-  matched = src.match(/charset="([^"]+)"/);
+  matched = src.match(/charset="([^ "']+)"/);
   if (matched) {
     return matched[1];
   }
 
-  matched = src.match(/charset='([^']+)'/);
+  matched = src.match(/charset='([^ "']+)'/);
   if (matched) {
     return matched[1];
   }
 
-  matched = src.match(/charset=([^ ]+)/);
+  matched = src.match(/charset=([^ "']+)/);
   if (matched) {
     return matched[1];
   }
 
-  matched = src.match(/encoding="([^"]+)"/)
+  matched = src.match(/encoding="([^ "']+)"/)
   if (matched) {
     return matched[1];
   }
 
-  matched = src.match(/encoding='([^']+)'/)
+  matched = src.match(/encoding='([^ "']+)'/)
   if (matched) {
     return matched[1];
   }
