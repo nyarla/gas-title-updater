@@ -58,6 +58,7 @@ function main() {
   sortSheet(sheet);
 
   const data: Payload = getTopRow(sheet);
+
   if (data.Locked === "TURE") {
     Logger.log("skip: locked url");
     Logger.log("done");
@@ -77,7 +78,8 @@ function main() {
   data.DateTime = (new Date(Date.now())).toISOString();
   writeToTopRow(sheet, data);
 
-  const [status, location, content] = fetchUrl(data.Link, date);
+  const href = (data.Link.match(/^https?:/) && isSameHref(data.Link, data.Permalink)) ? data.Link : data.Permalink;
+  const [status, location, content] = fetchUrl(href, date);
   if (status === 304) {
     Logger.log("fetch: this url not modified.");
     Logger.log("done");
@@ -85,21 +87,31 @@ function main() {
   }
 
   data.StatusCode = status;
-  if (location) {
-    data.Permalink = location;
-  }
+  data.Permalink = location;
 
   if (status === 200) {
     const title = parseTitle(content, data.Title);
     if (title) {
-      data.Title = title;
+      if (! stripTitle(title).includes(data.Title)) {
+        data.Message = "Warning: the title of this url does not have old title.";
+      }
+
+      data.Title = stripTitle(title);
+    }
+
+    if (!isSameHref(data.Link, data.Permalink)) {
+      data.Locked = "TRUE";
     }
 
     Logger.log('fetchurl is succeed.');
   }
   else {
     data.Locked  = "TRUE";
-    data.Message = content;
+
+    if ( 500 <= status && status <= 599 ) {
+      data.Message = content;
+    }
+
     Logger.log('failed to fetchurl.');
   }
 
