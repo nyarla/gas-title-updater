@@ -38,7 +38,7 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
       statusCode = response.getResponseCode();
      
       if (301 <= statusCode && statusCode <= 399) {
-        location = response.getHeaders().Location;
+        location = makeRedirectUrl(location, response.getHeaders().Location);
         continue;
       }
 
@@ -46,7 +46,7 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
         break;
       }
 
-      const charset = detectEncoding(response.getHeaders()['Content-Type'], response.getContentText());
+      const charset = detectEncoding(response.getContentText());
       content = response.getContentText(charset);
 
       break;
@@ -57,6 +57,24 @@ function fetchUrl(href, lastUpdated): [ number, string, string ] {
   }
 
   return [statusCode, location, content];
+}
+
+function makeRedirectUrl(from, to) {
+  if (from === to) {
+    return from;
+  }
+
+  const redirect = to.replace(/https:\/\/([^\/]+):443/, 'https://$1');
+  if (redirect !== to) {
+    return redirect;
+  }
+
+  if (to.match(/^\//)) {
+    const [ _, proto, domain ] = from.match(/^(https?):\/\/([^\/]+)/);
+    return `${proto}://${domain}${to}`;
+  }
+
+  return to;
 }
 
 function testShouldUpdate() {
@@ -99,11 +117,29 @@ function testIsSameHref() {
   }
 }
 
+function testMakeRedirectUrl() {
+  const cases = [
+    [ [ 'http://example.com/foo', 'https://example.com:443/foo' ], 'https://example.com/foo' ],
+    [ [ 'https://example.com/', '/foo' ], 'https://example.com/foo' ],
+  ];
+
+  for (const test of cases) {
+    const [ fromto, expect ] = test;
+    const [ from, to ] = fromto;
+
+    const result = makeRedirectUrl(from, to);
+    if (result !== expect) {
+      throw new Error(`failed to makeRedirectUrl: ${from}, ${to} => ${result} !== ${expect}`);
+    }
+  }
+}
+
 function testFetchUrl() {
   const cases = [
-    ['https://example.com', [ 200, 'https://example.com', /Example Domain/ ] ],
-    ['http://www.remus.dti.ne.jp/~takeucto/', [ 200, 'http://www.remus.dti.ne.jp/~takeucto/', /竹箒/ ] ],
     ['http://the.kalaclista.com', [ 200, 'https://the.kalaclista.com/', /カラクリスタ/ ] ],
+    ['http://www.remus.dti.ne.jp/~takeucto/', [ 200, 'http://www.remus.dti.ne.jp/~takeucto/', /竹箒/ ] ],
+    ['http://age.s22.xrea.com/talk2ch/', [ 200, 'http://age.s22.xrea.com/talk2ch/', /ちゃんねる/ ] ],
+    ['http://bylines.news.yahoo.co.jp/egawashoko/20140315-00033563/', [ 200, 'https://news.yahoo.co.jp/expert/articles/453fc85883a715473b2e15d9c95bd2150f05d907', /遠隔操作/ ]],
   ];
 
   for (const test of cases) {
