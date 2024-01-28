@@ -43,8 +43,8 @@ function stripTitle(title: string): string {
   return title.replace(/\s+/g, ' ')
 }
 
-function detectEncoding(contentType, src: string): string {
-  let matched = contentType.match(/charset=([^ "']+)/);
+function detectEncoding(src: string): string {
+  matched = src.match(/charset=([^ "']+)/);
   if (matched) {
     return matched[1];
   }
@@ -59,11 +59,6 @@ function detectEncoding(contentType, src: string): string {
     return matched[1];
   }
 
-  matched = src.match(/charset=([^ "']+)/);
-  if (matched) {
-    return matched[1];
-  }
-
   matched = src.match(/encoding="([^ "']+)"/)
   if (matched) {
     return matched[1];
@@ -74,7 +69,7 @@ function detectEncoding(contentType, src: string): string {
     return matched[1];
   }
 
-  return 'utf-8';
+  return 'UTF-8';
 }
 
 function testParseTitle() {
@@ -99,19 +94,18 @@ function testParseTitle() {
 
 function testDetectEncoding() {
   const cases = [
-    [ ['charset=UTF-8', ''], 'UTF-8' ],
-    [ ['', 'charset="UTF-8"'], 'UTF-8' ],
-    [ ['', "charset='UTF-8'"], 'UTF-8' ],
-    [ ['', 'charset=UTF-8'], 'UTF-8' ],
-    [ ['', 'encoding="UTF-8"'], 'UTF-8' ],
-    [ ['', "encoding='UTF-8'"], 'UTF-8' ],
+    [  '' , 'UTF-8' ],
+    [  'charset="UTF-8"', 'UTF-8' ],
+    [  "charset='UTF-8'", 'UTF-8' ],
+    [  'charset=UTF-8', 'UTF-8' ],
+    [  'encoding="UTF-8"', 'UTF-8' ],
+    [  "encoding='UTF-8'", 'UTF-8' ],
   ];
 
   for (const test of cases) {
-    const [ payload, charset ] = test;
-    const [ contentType, src ] = payload;
-    if (detectEncoding(contentType, src) !== charset) {
-      throw new Error(`failed to detect encoding: ${contentType} ${src}`);
+    const [ src, charset ] = test;
+    if (detectEncoding(src) !== charset) {
+      throw new Error(`failed to detect encoding: ${src}`);
     }
   }
 }
